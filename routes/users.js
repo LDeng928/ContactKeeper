@@ -3,10 +3,11 @@ const router = express.Router();
 const User = require('../models/User');
 const { body, validationResult, check } = require('express-validator');
 const { genSalt } = require('bcryptjs');
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('config');
 
 
-// Register a new user
 // @route     POST  api/users
 // @desc      Register a user
 // @access    Public 
@@ -17,7 +18,7 @@ router.post('/', [
 ], async (req, res) => {
     const errors = validationResult(req);
 
-    // check if errors are empty
+    // check if errors are empty from the validationResult
     if(!errors.isEmpty()){
         return res.status(400).json({ errors: errors.array() }) // if the errors are not empty, send the errors
     }
@@ -26,7 +27,7 @@ router.post('/', [
     const { name, email, password } = req.body;
 
     try{
-        let user= await User.findOne({ email: email}); // find the user by email
+        let user= await User.findOne({ email: email}); // find the user by email using the MongoDB model
 
         // If the user already exists, send a bad request
         if(user) {
@@ -46,10 +47,24 @@ router.post('/', [
         // Get a hash version of the password
         user.password = await bcrypt.hash(password, salt);
 
-        // Save the new User instance to MongoDB
+        // Save the new User instance to MongoDB with a hashed password
         await user.save();
         
-        res.send('User saved.')
+        // Create the payload to json web token. This is the secure the data from backend to frontend.
+        const payload = {
+            user: {
+                id: user.id // This is the id created by MongoDB. With the id, you can access all the contacts the user has
+            }
+        }
+
+        jwt.sign(payload, config.get('jwtSecret'), {
+            expiresIn: 360000 // jwt will be destroy in 360000 seconds. 
+        }, (err, token) => {
+            // callback function
+            if(err) throw err;
+            // Otherwise, send the token back to the frontend
+            res.json({token})
+        });
 
     } catch (err) {
         console.error(err.message);
