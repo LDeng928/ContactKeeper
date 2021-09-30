@@ -6,6 +6,9 @@ const app = express();
 // Connect database by calling connectDB function
 connectDB();
 
+// Add middleware
+app.use(express.json({extended: false}));
+
 // Routes - home
 app.get('/', (req, res) => res.json({msg: 'Welcome to the Contact Keeper API.'}));
 
