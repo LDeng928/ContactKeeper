@@ -7,11 +7,22 @@ export const Contacts = () => {
     const contactContext = useContext(ContactContext);
 
     // Destruct the state
-    const { contacts } = contactContext;
+    const { contacts, filtered } = contactContext;
 
+    // Check contacts state is empty, if so, return a h4.
+    if(contacts.length === 0 ) {
+        return <h4>Please add a contact.</h4>
+    } 
+
+    // If filtered is not null, map through the filtered array, otherwise map through the contacts array
     return (
         <Fragment>
-            {contacts.map(contact => <ContactItem contact={contact} key={contact.id}></ContactItem>)}
+        {filtered !== null 
+        ? filtered.map((contact) => (
+            <ContactItem contact={contact} key={contact.id}></ContactItem>)) 
+        : contacts.map(contact => (
+            <ContactItem contact={contact} key={contact.id}></ContactItem>
+            ))}          
         </Fragment>
     )
 }
