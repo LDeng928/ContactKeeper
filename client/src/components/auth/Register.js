@@ -1,6 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
+import AlertContext from '../../context/alert/alertContext'
+import AuthContext from '../../context/auth/authContext'
 
 export const Register = () => {
+    // Initialize the context
+    const alertContext = useContext(AlertContext)
+    const authContext = useContext(AuthContext);
+
+    // Destruction from context
+    const { setAlert } = alertContext;
+    const { register, error, clearErrors } = authContext;
+
+    // Check if error from the authContext.
+    useEffect(() => {
+        if(error === 'User already exists.') {
+            setAlert(error, 'danger');
+            clearErrors(); // clear the errors afterwards
+        }
+    }, [error]) // [error] value is the dependency to useEffect
+
+
     // This is a form component, so there is local state
     const [user, setUser] = useState({
         name: '',
@@ -20,7 +39,20 @@ export const Register = () => {
     // onSubmit
     const onSubmit = e => {
         e.preventDefault();
-        console.log('Registed submit');
+        if(name === '' || email === '' || password === '') {
+            setAlert('Please enter all fields', 'danger');
+        } else if(password !== confirmPassword) {
+            setAlert('Passwords do not match', 'danger')
+        } else {
+            // console.log('Registed submit');
+
+            // register takes in the object which is the formData
+            register({
+                name,
+                email,
+                password
+            }); // Use the register method from authContext to register a new user into the database.
+        }        
     }
 
     return (
@@ -33,15 +65,15 @@ export const Register = () => {
                 </div>
                 <div className="form-group">
                     <label htmlFor="email">Email</label>
-                    <input type="email" email='email' value={email} onChange={onChange} />
+                    <input type="email" name='email' value={email} onChange={onChange} />
                 </div>
                 <div className="form-group">
                     <label htmlFor="password">Password</label>
-                    <input type="password" name='password' value={password} onChange={onChange} />
+                    <input type="password" name='password' value={password} onChange={onChange} minLength='6'/>
                 </div>
                 <div className="form-group">
                     <label htmlFor="confirmPassword">Confirm Password</label>
-                    <input type="password" name='confirmPassword' value={confirmPassword} onChange={onChange} />
+                    <input type="password" name='confirmPassword' value={confirmPassword} onChange={onChange} minLength='6' />
                 </div>
 
                 <input type="submit" value="Register" className='btn btn-primary btn-block' />
