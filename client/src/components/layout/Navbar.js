@@ -3,16 +3,20 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom'
 
 import AuthContext from '../../context/auth/authContext';
+import ContactContext from '../../context/contact/contactContext';
 
 export const Navbar = ({ title, icon }) => {
     // Initialize the context
-    const authContext = useContext(AuthContext)
+    const authContext = useContext(AuthContext);
+    const contactContext = useContext(ContactContext);
 
     // Destruction
     const { isAuthenticated, logout, user } = authContext;
+    const { clearContacts } = contactContext;
 
     const onLogout =() => {
-        logout();
+        logout(); // remove all user credentials
+        clearContacts(); // remove all user contacts
     }
 
     // variable for auth links
