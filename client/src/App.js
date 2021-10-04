@@ -12,6 +12,13 @@ import ContactState from './context/contact/ContactState';
 import AuthState from './context/auth/AuthState';
 import AlertState from './context/alert/AlertState';
 
+import setAuthToken from './Utils/setAuthToken';
+
+// Get request /api/auth as soon as the app is loaded
+if(localStorage.token) {
+  setAuthToken(localStorage.token)
+}
+
 const App = () => {
   return (
    

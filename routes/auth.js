@@ -45,7 +45,7 @@ router.post('/', [
 
         // If user is not found by the email. Send back an error message.
         if(!user) {
-            return res.status(400).json({ msg: 'Invalid credentials '});
+            return res.status(400).json({ msg: 'Invalid credentials'});
         }
 
         // Use bcrypt to check if the password is a match.

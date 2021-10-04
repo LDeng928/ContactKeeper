@@ -1,6 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
+import AuthContext from '../../context/auth/authContext';
+import AlertContext from '../../context/alert/alertContext'
 
-export const Login = () => {
+export const Login = (props) => {
+     // Initialize the context
+     const alertContext = useContext(AlertContext)
+     const authContext = useContext(AuthContext);
+ 
+     // Destruction from context
+     const { setAlert } = alertContext;
+     const { login, error, clearErrors, isAuthenticated } = authContext;
+
+     useEffect(() => {
+        if(isAuthenticated) {
+            // Redirect the user to home page
+            props.history.push('/');
+        }
+        if(error === 'Invalid credentials') { // Check if error from the authContext.
+            setAlert(error, 'danger');
+            clearErrors(); // clear the errors afterwards
+        }
+        // eslint-disable-next-line
+    }, [error, isAuthenticated, props.history]) // [error] value is the dependency to useEffect
+
     // This is a form component, so there is local state
     const [user, setUser] = useState({       
         email: '',
@@ -18,7 +40,14 @@ export const Login = () => {
     // onSubmit
     const onSubmit = e => {
         e.preventDefault();
-        console.log('Log in submit');
+        if(email === '' || password === '') {
+            setAlert('Please fill in all fields', 'danger');
+        } else {
+            login({  // login takes in the object which is the formData
+                email,
+                password
+            });  // Use the login method from authContext to register a new user into the database.
+        }
     }
 
     return (
@@ -27,7 +56,7 @@ export const Login = () => {
             <form onSubmit={onSubmit}>               
                 <div className="form-group">
                     <label htmlFor="email">Email</label>
-                    <input type="email" email='email' value={email} onChange={onChange} />
+                    <input type="email" name='email' value={email} onChange={onChange} />
                 </div>
                 <div className="form-group">
                     <label htmlFor="password">Password</label>

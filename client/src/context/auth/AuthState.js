@@ -13,6 +13,8 @@ import {
     CLEAR_ERRORS 
 } from '../types'
 
+import setAuthToken from '../../Utils/setAuthToken';
+
 const AuthState = props => {
     const initialState = {
         user: null,
@@ -26,9 +28,31 @@ const AuthState = props => {
     const [state, dispatch] = useReducer(AuthReducer, initialState);
 
     // Actions
-    // Load user
+    // LOAD USER (AUTH USER)
+    const loadUser = async () => {
+        // load token into the global headers
+        if(localStorage.token) {
+            setAuthToken(localStorage.token)
+        }
 
-    // Register user
+        try {
+            const res = await axios.get('/api/auth');
+
+            // If the result comes back ok
+            dispatch({
+                type: USER_LOADED,
+                payload: res.data
+            });
+
+        } catch (error) {
+            // If the result comes back wrong
+            dispatch({
+                type: AUTH_ERROR
+            });
+        }
+    }
+
+    // REGISTER USER
     const register = async formData => {
         // Needs to fill in the headers section
         const config = {
@@ -44,26 +68,57 @@ const AuthState = props => {
             dispatch({
                 type: REGISTER_SUCCESS,
                 payload: res.data // The payload is the token.
-             })
+             });
+
+            // After the dispatch, load the user
+            loadUser();
         } catch (error) {
             // If there are errors, dispatch fail
             dispatch({
                 type: REGISTER_FAIL,
                 payload: error.response.data.msg // The payload will be msg from backend.
-             })
+             });
         }
     }
 
-    // Log in user
+    // LOGIN USER
+    const login = async formData => {
+        // Needs to fill in the headers section
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
 
-    // Logout
+        try {
+            const res = await axios.post('api/auth', formData, config) // The res will be the token when registering a new user.
 
-    // Clear errors
+            // Dispatch the response to the authReducer
+            dispatch({
+                type: LOGIN_SUCCESS,
+                payload: res.data // The payload is the token.
+             });
+
+            // After the dispatch, load the user
+            loadUser();
+        } catch (error) {
+            // If there are errors, dispatch fail
+            dispatch({
+                type: LOGIN_FAIL,
+                payload: error.response.data.msg // The payload will be msg from backend.
+             });
+        }
+    }
+
+    // LOGOUT
+    const logout = () => dispatch({ type: LOGOUT });
+
+    // CLEAR ERRORS
     const clearErrors = () => dispatch({ type: CLEAR_ERRORS });
 
    
 
-    // Return the provider
+    // RETURN THE PROVIDER (CONTEXT)
     return (
         <AuthContext.Provider
             value = {{
@@ -73,7 +128,10 @@ const AuthState = props => {
                 loading: state.loading,
                 error: state.error   ,
                 register,
-                clearErrors            
+                clearErrors,
+                loadUser,
+                login,
+                logout        
             }}>            
             {props.children}
         </AuthContext.Provider>

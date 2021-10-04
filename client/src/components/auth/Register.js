@@ -2,22 +2,26 @@ import React, { useState, useContext, useEffect } from 'react'
 import AlertContext from '../../context/alert/alertContext'
 import AuthContext from '../../context/auth/authContext'
 
-export const Register = () => {
+export const Register = props => {
     // Initialize the context
     const alertContext = useContext(AlertContext)
     const authContext = useContext(AuthContext);
 
     // Destruction from context
     const { setAlert } = alertContext;
-    const { register, error, clearErrors } = authContext;
-
-    // Check if error from the authContext.
+    const { register, error, clearErrors, isAuthenticated } = authContext;
+    
     useEffect(() => {
-        if(error === 'User already exists.') {
+        if(isAuthenticated) {
+            // Redirect the user to home page
+            props.history.push('/');
+        }
+        if(error === 'User already exists.') { // Check if error from the authContext.
             setAlert(error, 'danger');
             clearErrors(); // clear the errors afterwards
         }
-    }, [error]) // [error] value is the dependency to useEffect
+        // eslint-disable-next-line
+    }, [error, isAuthenticated, props.history]) // [error] value is the dependency to useEffect
 
 
     // This is a form component, so there is local state
