@@ -64,7 +64,12 @@ export const Login = (props) => {
                 </div>               
                 <input type="submit" value="Login" className='btn btn-primary btn-block' />
             </form>
-
+            <p style={textStyle}>For demonstration purpose, please log in with email: <strong>new@gmail.com</strong> and <strong>password: 123456</strong>.</p>
         </div>
     )
+}
+
+const textStyle = {
+    color: 'red',
+    fontStyle: 'italic'
 }
